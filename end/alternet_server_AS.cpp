@@ -162,7 +162,7 @@ int main(){
                 .fd = tmps
             };
             pthread_create(&thread ,NULL, handle_client,(void*) (&arg));
-
+            
         }
 
     }
