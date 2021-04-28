@@ -17,7 +17,7 @@ void sighandler(int signum){
 }
 
 int main(){
-    const uint16_t port_number = 5000;
+    const uint16_t port_number = 6000;
 
     int sfd = socket(AF_INET, SOCK_STREAM, 0);
 
@@ -39,6 +39,10 @@ int main(){
     signal(SIGINT, sighandler);
 
     while(recv(sfd, buf, 1024, 0) > 0 && !isclosed){
+        if(strcmp(buf,"MAINT") == 0){
+            //MAINTAINACE OF SERVER 
+            
+        }
         printf("%s\n",buf);    
     }
     close(sfd);

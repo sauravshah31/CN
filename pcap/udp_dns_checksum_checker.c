@@ -13,7 +13,12 @@
 #include <netinet/ip.h>
 #include <netinet/udp.h>
 
+#include <linux/if_packet.h>
+
+#include <net/ethernet.h>
+
 #include <arpa/inet.h>
+
 #include <pcap/pcap.h>
 
 #define NETWORK_ADAPTER "enp0s3"
