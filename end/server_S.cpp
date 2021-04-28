@@ -57,6 +57,7 @@ typedef struct args{
     thread_client *ptr;
 }args;
 
+//function to serve client
 void* handle_client(void* arg){
 
     args *inp = (args*) arg;
@@ -141,7 +142,6 @@ int main(){
         pthread_create(&thread ,NULL, handle_client,(void*) (&arg));
 
         clients.insert(tmp);
-
     }
     close(sfd);
 }
