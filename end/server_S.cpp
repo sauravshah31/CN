@@ -33,6 +33,16 @@ void sighandler(int signum){
     }
 }
 
+//maintainance msg to client
+void send_maintainance_msg(int fd){
+    send(fd, "MAINT",6, 0);
+}
+
+//client details to alternate server
+void send_client_as(int client){
+    
+}
+
 //fake maintainance emulator
 void maintainance(){
     sleep(MAINTAINANCE_TIME);
@@ -40,10 +50,16 @@ void maintainance(){
 
 //signal for maintainace : SIGUSR1
 void maintainance_signal(int signum){
-    //send signal to all client serving threads to pause
     if(signum == SIGUSR1){
         for(auto t:clients){
+            //send signal to all client serving threads to pause
             pthread_kill(t->t, SIGSTOP);
+
+            //send msg to client that maintaince is goining on
+            send_maintainance_msg(t->fd);
+
+            //send msg to AS ragarding this client
+            send_client_as(t->fd);
         }
     }
 
