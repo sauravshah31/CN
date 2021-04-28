@@ -69,6 +69,29 @@ void sighandler(int signum){
 }
 
 
+//function to serve client
+void* handle_client(void* arg){
+
+    args *inp = (args*) arg;
+    int nsfd = inp->fd;
+    
+    printf("Client connected...\n");
+    
+    signal(SIGPIPE,SIG_IGN);
+    char msg[1024];
+    sprintf(msg, "Message from alternet server");
+    while(send(nsfd, msg, strlen(msg),0)>0){
+        sleep(1);
+    }
+    close(nsfd);
+    printf("Client disconnected\n");
+    signal(SIGPIPE,SIG_DFL);
+    close(nsfd);
+
+
+    return NULL;
+}
+
 
 int main(){
 
