@@ -15,6 +15,8 @@
 #include <unordered_set>
 
 
+#define MAINTAINANCE_TIME       10
+
 //keep track of clients connected
 std::unordered_set<pthread_t> clients;
 
@@ -27,11 +29,21 @@ void sighandler(int signum){
     }
 }
 
+//fake maintainance emulator
+void maintainance(){
+    sleep(MAINTAINANCE_TIME);
+}
+
 //signal for maintainace : SIGUSR1
 void maintainance_signal(int signum){
+    //send signal to all client serving threads
     if(signum == SIGUSR1){
-
+        for(auto t:clients)
+            pthread_kill(t, SIGUSR2);
     }
+
+    //do the maintainance
+    maintainance();
 }
 
 //argument to pass to thread function
@@ -65,6 +77,8 @@ void* handle_client(void* arg){
 }
 
 int main(){
+
+    //open a socket for client at port 5000
     const uint16_t port_number = 5000;
     int sfd = socket(AF_INET, SOCK_STREAM, 0);
     if(sfd<0){
@@ -87,13 +101,23 @@ int main(){
     } 
 
 
+    //ctrl + c closes the server
     signal(SIGINT, sighandler);
-    while(!isclosed){
 
+    //ignore SIGUSR2
+    signal(SIGUSR2, SIG_IGN);
+
+    //handle maintainance signal
+    signal(SIGUSR1, maintainance_signal);
+
+    //check if client wants to connect
+    while(!isclosed){
         struct sockaddr_in caddr;
         socklen_t caddrlen = sizeof(caddr);
         int nsfd = accept(sfd, (struct sockaddr*) &addr,&caddrlen);
 
+
+        //accept client and serve
         pthread_t thread;
         args arg = {
             .t = thread,
