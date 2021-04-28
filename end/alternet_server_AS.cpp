@@ -157,6 +157,11 @@ int main(){
                 perror("connect");
             }
 
+            pthread_t  thread;
+            args arg = {
+                .fd = tmps
+            };
+            pthread_create(&thread ,NULL, handle_client,(void*) (&arg));
 
         }
 
