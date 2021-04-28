@@ -155,6 +155,10 @@ int main(){
 
     addr.sin_port = htons(ALTERNATE_SERVER_PORT);
     //addr.sin_addr = inet_addr(ALTERNATE_SERVER_ADDR);
+    if(connect(afd,(struct sockaddr*) &addr, sizeof(addr)) < 0){
+        perror("connect");
+        return -1;
+    }
 
 
     //ctrl + c closes the server
