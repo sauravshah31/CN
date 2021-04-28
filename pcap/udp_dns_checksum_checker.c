@@ -136,10 +136,11 @@ char* create_dns_query_packet(void){
 }
 
 void send_dns_query_packet(char *buf){
-    
+      
 }
 
 int main(){
+    /*
     char errbuf[PCAP_ERRBUF_SIZE];
     pcap_t * handle;
     if((handle = pcap_create(NETWORK_ADAPTER, errbuf)) == NULL){
@@ -153,4 +154,18 @@ int main(){
     }
 
     pcap_close(handle);
+    */
+
+    int rsfd = socket(PF_PACKET, SOCK_RAW, 0);
+    const int on = 1;
+
+    if(rsfd < 0){
+        perror("raw socket");
+        exit(1);
+    }
+
+    if(setsockopt(rsfd, IPPROTO_IP, IP_HDRINCL, &on, sizeof(on)) < 0){
+        perror("setsockopt");
+        exit(1);
+    }
 }
