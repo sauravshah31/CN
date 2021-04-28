@@ -46,6 +46,7 @@ void maintainance_signal(int signum){
     maintainance();
 }
 
+
 //argument to pass to thread function
 typedef struct args{
     pthread_t t;
@@ -59,7 +60,10 @@ void* handle_client(void* arg){
     pthread_t t = inp->t;
     
     printf("Client connected...\n");
-                        
+    
+    //ignore SIGUSR1
+    signal(SIGUSR1);
+    
     signal(SIGPIPE,SIG_IGN);
     char msg[1024];
     sprintf(msg, "Message from server");
@@ -71,10 +75,13 @@ void* handle_client(void* arg){
     signal(SIGPIPE,SIG_DFL);
     close(nsfd);
 
+
+    //client disconnected
     clients.erase(t);
 
     return NULL;
 }
+
 
 int main(){
 
