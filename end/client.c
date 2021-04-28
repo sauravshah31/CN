@@ -26,6 +26,9 @@ int main(){
     addr.sin_addr.s_addr = htonl(INADDR_ANY);
     addr.sin_port = htons(port_number);
 
+    //bind to empty port
+    bind(sfd, NULL, NULL);
+
     connect(sfd,(struct sockaddr*) &addr, sizeof(addr));
 
     printf("Connected...");
@@ -35,6 +38,10 @@ int main(){
     signal(SIGINT, sighandler);
 
     while(recv(sfd, buf, 1024, 0) > 0 && !isclosed){
+        if(strcmp(buf, "MAINT") == 0){
+            //server maintainance started
+            accept(sfd, NULL, NULL);
+        }
         printf("%s\n",buf);    
     }
     close(sfd);

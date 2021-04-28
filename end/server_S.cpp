@@ -138,6 +138,8 @@ void* handle_client(void* arg){
 
 int main(){
 
+    printf("server pid : %d\n",getpid());
+
     //open a socket for client at port 5000
     const uint16_t port_number = 5000;
     int sfd = socket(AF_INET, SOCK_STREAM, 0);
