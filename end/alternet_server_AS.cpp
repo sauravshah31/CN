@@ -30,6 +30,12 @@ struct client{
 };
 std::vector<client> clients;
 
+//argument to pass to thread function
+typedef struct args{
+    int fd;
+}args;
+
+
 //function to convert json to map
 std::unordered_map<std::string,std::string> to_dict(char *b){
     int i=1;
@@ -114,7 +120,23 @@ int main(){
             clients.push_back(tmp);
         }
         close(msfd);
-        
+
+        //now serve the clients ,ie connect and serve
+        for(auto &c:clients){
+            int tmps = socket(AF_INET, SOCK_STREAM, 0);
+            c.fd = tmps;
+            sockaddr_in addr;
+            addr.sin_family = AF_INET;
+            addr.sin_port = c.port;
+            addr.sin_addr.s_addr = c.ip;
+
+            if(connect(tmps,(struct sockaddr*) &addr, sizeof(addr)) < 0){
+                perror("connect");
+            }
+
+
+        }
+
     }
     
     close(sfd);

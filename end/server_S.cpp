@@ -30,6 +30,13 @@ std::unordered_set<thread_client *> clients;
 //alternate server fd
 int afd=-1;
 
+//argument to pass to thread function
+typedef struct args{
+    int fd;
+    thread_client *ptr;
+}args;
+
+
 //for closing the server
 int isclosed = 0;
 void sighandler(int signum){
@@ -96,11 +103,7 @@ void maintainance_signal(int signum){
 }
 
 
-//argument to pass to thread function
-typedef struct args{
-    int fd;
-    thread_client *ptr;
-}args;
+
 
 //function to serve client
 void* handle_client(void* arg){
