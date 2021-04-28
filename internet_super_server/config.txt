@@ -1,0 +1,3 @@
+5001 tcp 10 ./server_tcp
+5002 udp 20 ./server_udp
+5003 tcp 30 ./server_tcp

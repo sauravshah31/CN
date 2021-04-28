@@ -1,0 +1,10 @@
+total 204
+-rwxrwxr-x 1 test test 17288 फरवरी   1 01:08 a.out
+-rw-rw-r-- 1 test test     0 फरवरी   1 01:24 object.txt
+-rw-rw-r-- 1 test test     0 जनवरी  31 23:59 out.txt
+-rwxrwxr-x 1 test test 16704 जनवरी  27 12:27 print_arg
+-rw-rw-r-- 1 test test  1619 फरवरी   1 01:24 program.txt
+-rwxrwxr-x 1 test test 17184 जनवरी  27 12:08 q1-p2
+-rwxrwxr-x 1 test test 16784 जनवरी  27 12:08 q1-p3
+drwxrwxr-x 2 test test  4096 जनवरी  29 01:50 temp
+-rwxrwxr-x 1 test test 16704 जनवरी  27 15:20 temp_print
