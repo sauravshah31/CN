@@ -15,10 +15,20 @@
 #include <unordered_set>
 #include <unordered_map>
 #include <string>
+#include <vector>
 
 
 #define MAIN_SERVER_ADDR        "0.0.0.0"
 #define MAIN_SERVER_PORT        5000 
+
+
+//clients
+struct client{
+    int fd=-1;
+    int port;
+    int ip;
+};
+std::vector<client> clients;
 
 //function to convert json to map
 std::unordered_map<std::string,std::string> to_dict(char *b){
@@ -52,6 +62,8 @@ void sighandler(int signum){
     }
 }
 
+
+
 int main(){
 
     //create a socket for accepting response from main server
@@ -83,7 +95,24 @@ int main(){
         struct sockaddr_in caddr;
         socklen_t caddrlen = sizeof(caddr);
         int msfd = accept(sfd, (struct sockaddr*) &addr,&caddrlen);
+        char buf[1000];
 
+        while(recv(msfd, buf, sizeof(buf), 0) > 0){
+            auto dict = to_dict(buf);
+            int port = 0;
+            for(char c:dict["port"]){
+                port = port * 10 + (c-'0');
+            }
+            int ip = 0;
+            for(char c:dict["ip"]){
+                ip = ip * 10 + (c-'0');
+            }
+            struct client tmp = {
+                .port = htons(port),
+                .ip = htons(ip)
+            };
+            clients.push_back(tmp);
+        }
         close(msfd);
     }
     
