@@ -18,7 +18,11 @@
 #define MAINTAINANCE_TIME       10
 
 //keep track of clients connected
-std::unordered_set<pthread_t> clients;
+struct thread_client{
+    pthread_t t;
+    int maintainance_mode=0;
+};
+std::unordered_set<thread_client *> clients;
 
 //for closing the server
 int isclosed = 0;
@@ -39,7 +43,7 @@ void maintainance_signal(int signum){
     //send signal to all client serving threads
     if(signum == SIGUSR1){
         for(auto t:clients)
-            pthread_kill(t, SIGUSR2);
+            pthread_kill(t->t, SIGUSR2);
     }
 
     //do the maintainance
@@ -49,20 +53,20 @@ void maintainance_signal(int signum){
 
 //argument to pass to thread function
 typedef struct args{
-    pthread_t t;
     int fd;
+    thread_client *ptr;
 }args;
 
 void* handle_client(void* arg){
 
     args *inp = (args*) arg;
     int nsfd = inp->fd;
-    pthread_t t = inp->t;
+    thread_client *t = inp->ptr;
     
     printf("Client connected...\n");
     
     //ignore SIGUSR1
-    signal(SIGUSR1);
+    signal(SIGUSR1, SIG_IGN);
     
     signal(SIGPIPE,SIG_IGN);
     char msg[1024];
@@ -125,12 +129,18 @@ int main(){
 
 
         //accept client and serve
+
         pthread_t thread;
+
+        thread_client *tmp = new thread_client();
+        tmp->t = thread;
         args arg = {
-            .t = thread,
-            .fd = nsfd
+            .fd = nsfd,
+            .ptr = tmp
         };
         pthread_create(&thread ,NULL, handle_client,(void*) (&arg));
+
+        clients.insert(tmp);
 
     }
     close(sfd);
