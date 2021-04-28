@@ -17,12 +17,18 @@
 
 #define MAINTAINANCE_TIME       10
 
+#define ALTERNATE_SERVER_ADDR    "0.0.0.0"
+#define ALTERNATE_SERVER_PORT    7000
+
 //keep track of clients connected
 struct thread_client{
     pthread_t t;
     int fd;
 };
 std::unordered_set<thread_client *> clients;
+
+//alternate server fd
+int afd=-1;
 
 //for closing the server
 int isclosed = 0;
@@ -40,7 +46,17 @@ void send_maintainance_msg(int fd){
 
 //client details to alternate server
 void send_client_as(int client){
+    struct sockaddr addr;
+    socklen_t addrlen;
+    getpeername(client, &addr, &addrlen);
+
+    char buf[1000];
+    struct sockaddr_in s = *((struct sockaddr_in *) &addr);
     
+    //send client ip,port to alternate server : in json format
+    sprintf(buf,"{\"ip\":\"%d\",\"port\":\"%d\"}",s.sin_port, s.sin_addr.s_addr);
+
+    send(afd, buf, strlen(buf),0);
 }
 
 //fake maintainance emulator
@@ -128,6 +144,9 @@ int main(){
         printf("listen error : %s\n",strerror(errno));
         return -1;
     } 
+
+
+    //connect to alternate server
 
 
     //ctrl + c closes the server
