@@ -147,8 +147,16 @@ int main(){
 
 
     //connect to alternate server
+    afd = socket(AF_INET, SOCK_STREAM, 0);
+    if(afd<0){
+        printf("socket error : %sn",strerror(errno));
+        return -1;
+    }
 
+    addr.sin_port = htons(ALTERNATE_SERVER_PORT);
+    addr.sin_addr = inet_addr(ALTERNATE_SERVER_ADDR);
 
+    
     //ctrl + c closes the server
     signal(SIGINT, sighandler);
 
