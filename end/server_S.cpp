@@ -154,9 +154,9 @@ int main(){
     }
 
     addr.sin_port = htons(ALTERNATE_SERVER_PORT);
-    addr.sin_addr = inet_addr(ALTERNATE_SERVER_ADDR);
+    //addr.sin_addr = inet_addr(ALTERNATE_SERVER_ADDR);
 
-    
+
     //ctrl + c closes the server
     signal(SIGINT, sighandler);
 
