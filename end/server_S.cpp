@@ -86,7 +86,7 @@ void maintainance_signal(int signum){
             //addr.sin_addr = inet_addr(ALTERNATE_SERVER_ADDR);
             if(connect(afd,(struct sockaddr*) &addr, sizeof(addr)) < 0){
                 perror("connect");
-                return -1;
+                return;
             }
 
             //send msg to client that maintaince is goining on
@@ -95,7 +95,7 @@ void maintainance_signal(int signum){
             //send msg to AS ragarding this client
             send_client_as(t->fd);
         }
-        close(sfd);
+        close(afd);
     }
 
     //do the maintainance
