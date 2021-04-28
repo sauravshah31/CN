@@ -135,8 +135,17 @@ char* create_dns_query_packet(void){
 
 }
 
-void send_dns_query_packet(char *buf){
-      
+void send_dns_query_packet(int rsfd, char *buf){
+    struct sockaddr_in sin;
+    memset(&sin, 0, sizeof(sin));
+    sin.sin_family = AF_INET;
+    sin.sin_addr.s_addr = ((struct ip*)buf)->ip_dst.s_addr;
+
+    if(sendto(rsfd, buf, sizeof(buf), 0, (struct sockaddr *)&sin, sizeof(struct sockaddr)) < 0){
+        perror("sendto");
+        exit(1);
+    }
+
 }
 
 int main(){
