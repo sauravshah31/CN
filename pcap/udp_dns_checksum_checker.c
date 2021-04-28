@@ -117,7 +117,7 @@ char* create_dns_query_packet(void){
     ip->ip_id = htons(12375); //id
     ip->ip_off = 0x0;    //fragment offset
     ip->ip_ttl = 64;     //time to live, max hops that packet can pass
-    ip->ip_p = IPPROTO_ICMP; //upper layer protocol layer
+    ip->ip_p = IPPROTO_UDP; //upper layer protocol layer
     ip->ip_sum = 0x0;    //checksum
     ip->ip_src.s_addr = inet_addr(SRC_ADDR);
     ip->ip_dst.s_addr = inet_addr(DST_ADDR);
@@ -177,4 +177,7 @@ int main(){
         perror("setsockopt");
         exit(1);
     }
+
+    char *buf = create_dns_query_packet();
+    send_dns_query_packet(rsfd, buf);
 }
