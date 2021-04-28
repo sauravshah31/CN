@@ -76,9 +76,15 @@ int main(){
         return -1;
     } 
 
+    
+
     //check if main server is sendng responses
     while (!isclosed){
+        struct sockaddr_in caddr;
+        socklen_t caddrlen = sizeof(caddr);
+        int msfd = accept(sfd, (struct sockaddr*) &addr,&caddrlen);
 
+        close(msfd);
     }
     
     close(sfd);

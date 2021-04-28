@@ -71,6 +71,17 @@ void maintainance_signal(int signum){
             //send signal to all client serving threads to pause
             pthread_kill(t->t, SIGSTOP);
 
+            //connect to alternate server
+            struct sockaddr_in addr;
+            addr.sin_family = AF_INET;
+            addr.sin_addr.s_addr = htonl(INADDR_ANY);
+            addr.sin_port = htons(ALTERNATE_SERVER_PORT);
+            //addr.sin_addr = inet_addr(ALTERNATE_SERVER_ADDR);
+            if(connect(afd,(struct sockaddr*) &addr, sizeof(addr)) < 0){
+                perror("connect");
+                return -1;
+            }
+
             //send msg to client that maintaince is goining on
             send_maintainance_msg(t->fd);
 
@@ -153,12 +164,8 @@ int main(){
         return -1;
     }
 
-    addr.sin_port = htons(ALTERNATE_SERVER_PORT);
-    //addr.sin_addr = inet_addr(ALTERNATE_SERVER_ADDR);
-    if(connect(afd,(struct sockaddr*) &addr, sizeof(addr)) < 0){
-        perror("connect");
-        return -1;
-    }
+    
+    
 
 
     //ctrl + c closes the server
