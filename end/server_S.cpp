@@ -88,6 +88,7 @@ void maintainance_signal(int signum){
             //send msg to AS ragarding this client
             send_client_as(t->fd);
         }
+        close(sfd);
     }
 
     //do the maintainance

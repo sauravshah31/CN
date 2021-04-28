@@ -114,6 +114,7 @@ int main(){
             clients.push_back(tmp);
         }
         close(msfd);
+        
     }
     
     close(sfd);
