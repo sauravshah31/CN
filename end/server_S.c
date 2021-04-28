@@ -13,10 +13,11 @@
 #include <pthread.h>
 
 
-
+//for closing the server
+int isclosed = 0;
 void sighandler(int signum){
     if(signum == SIGINT){
-        printf("\b\bClosing Server\n");
+        printf("\b\bClosing Server...\n");
         isclosed = 1;
     }
 }
@@ -29,14 +30,13 @@ typedef struct args{
 void* handle_client(void* arg){
 
     args *inp = (args*) arg;
-    int i = inp->service_no;
     int nsfd = inp->fd;
     
-    printf("Client connected\n");
+    printf("Client connected...\n");
                         
     signal(SIGPIPE,SIG_IGN);
     char msg[1024];
-    sprintf(msg, "Message from server : service %d",i);
+    sprintf(msg, "Message from server");
     while(send(nsfd, msg, strlen(msg),0)>0){
         sleep(1);
     }
@@ -47,74 +47,41 @@ void* handle_client(void* arg){
 }
 
 int main(){
-    const int backlogs[NSERVICE] = {3,3,3,3};
-    const uint16_t port_numbers[NSERVICE] = {5000,5001,5002,5003};
-    int sfds[NSERVICE];
-
-    for(int i=0;i<NSERVICE;i++){
-        int sfd = socket(AF_INET, SOCK_STREAM, 0);
-        if(sfd<0){
-            printf("socket error : %sn",strerror(errno));
-            return -1;
-        }
-        sfds[i] = sfd;
+    const uint16_t port_number = 5000;
+    int sfd = socket(AF_INET, SOCK_STREAM, 0);
+    if(sfd<0){
+        printf("socket error : %sn",strerror(errno));
+        return -1;
     }
     
     struct sockaddr_in addr;
     addr.sin_family = AF_INET;
     addr.sin_addr.s_addr = htonl(INADDR_ANY);
+    addr.sin_port = htons(port_number);
 
-    for(int i=0;i<NSERVICE;i++){    
-        addr.sin_port = htons(port_numbers[i]);
-
-        if(bind(sfds[i], (struct sockaddr*) &addr, sizeof(addr))<0){
-            printf("bind err : %s\n",strerror(errno));
-            return -1;
-        }
-        if(listen(sfds[i],backlogs[i]) < 0){
-            printf("listen error : %s\n",strerror(errno));
-            return -1;
-        } 
+    if(bind(sfd, (struct sockaddr*) &addr, sizeof(addr))<0){
+        printf("bind err : %s\n",strerror(errno));
+        return -1;
+    }
+    if(listen(sfd,10) < 0){
+        printf("listen error : %s\n",strerror(errno));
+        return -1;
     } 
 
-    struct pollfd pollfds[NSERVICE];
-    for(int i=0;i<NSERVICE;i++){
-        pollfds[i].fd = sfds[i];
-        pollfds[i].events = POLLIN;
-    }
 
     signal(SIGINT, sighandler);
     while(!isclosed){
-        printf("listening...\n");
 
-        int status = poll(pollfds,NSERVICE,-1);
-        if(status == -1){
-            printf("poll error\n");
-            continue;
-        }
+        struct sockaddr_in caddr;
+        socklen_t caddrlen = sizeof(caddr);
+        int nsfd = accept(sfd, (struct sockaddr*) &addr,&caddrlen);
 
-        if(status > 0){
-            for(int i=0;i<NSERVICE;i++){
-                if(pollfds[i].revents & POLLIN){
-                    int sfd = sfds[i];
-                    struct sockaddr_in caddr;
-                    socklen_t caddrlen = sizeof(caddr);
-                    int nsfd = accept(sfd, (struct sockaddr*) &addr,&caddrlen);
+        pthread_t thread;
+        args arg = {
+            .fd = nsfd
+        };
+        pthread_create(&thread ,NULL, handle_client,(void*) (&arg));
 
-                    pthread_t thread;
-                    args arg = {
-                        .fd = nsfd,
-                        .service_no = i
-                    };
-                    pthread_create(&thread ,NULL, handle_client,(void*) (&arg));
-
-                    
-                }
-            }
-        }
-        
     }
-    
-    for(int i=0;i<NSERVICE;i++)
-        close(sfds[i]);
+    close(sfd);
 }
