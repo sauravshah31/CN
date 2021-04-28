@@ -20,7 +20,7 @@
 //keep track of clients connected
 struct thread_client{
     pthread_t t;
-    int maintainance_mode=0;
+    int fd;
 };
 std::unordered_set<thread_client *> clients;
 
@@ -40,10 +40,11 @@ void maintainance(){
 
 //signal for maintainace : SIGUSR1
 void maintainance_signal(int signum){
-    //send signal to all client serving threads
+    //send signal to all client serving threads to pause
     if(signum == SIGUSR1){
-        for(auto t:clients)
-            pthread_kill(t->t, SIGUSR2);
+        for(auto t:clients){
+            pthread_kill(t->t, SIGSTOP);
+        }
     }
 
     //do the maintainance
@@ -116,8 +117,6 @@ int main(){
     //ctrl + c closes the server
     signal(SIGINT, sighandler);
 
-    //ignore SIGUSR2
-    signal(SIGUSR2, SIG_IGN);
 
     //handle maintainance signal
     signal(SIGUSR1, maintainance_signal);
@@ -135,6 +134,7 @@ int main(){
 
         thread_client *tmp = new thread_client();
         tmp->t = thread;
+        tmp->fd = nsfd;
         args arg = {
             .fd = nsfd,
             .ptr = tmp
