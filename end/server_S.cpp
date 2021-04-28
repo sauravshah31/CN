@@ -12,6 +12,11 @@
 
 #include <pthread.h>
 
+#include <unordered_set>
+
+
+//keep track of clients connected
+std::unordered_set<pthread_t> clients;
 
 //for closing the server
 int isclosed = 0;
@@ -22,8 +27,16 @@ void sighandler(int signum){
     }
 }
 
+//signal for maintainace : SIGUSR1
+void maintainance_signal(int signum){
+    if(signum == SIGUSR1){
+
+    }
+}
+
 //argument to pass to thread function
 typedef struct args{
+    pthread_t t;
     int fd;
 }args;
 
@@ -31,6 +44,7 @@ void* handle_client(void* arg){
 
     args *inp = (args*) arg;
     int nsfd = inp->fd;
+    pthread_t t = inp->t;
     
     printf("Client connected...\n");
                         
@@ -44,6 +58,10 @@ void* handle_client(void* arg){
     printf("Client disconnected\n");
     signal(SIGPIPE,SIG_DFL);
     close(nsfd);
+
+    clients.erase(t);
+
+    return NULL;
 }
 
 int main(){
@@ -78,6 +96,7 @@ int main(){
 
         pthread_t thread;
         args arg = {
+            .t = thread,
             .fd = nsfd
         };
         pthread_create(&thread ,NULL, handle_client,(void*) (&arg));
